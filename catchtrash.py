@@ -33,6 +33,12 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
     asset_roi = asset[src_y1:src_y2, src_x1:src_x2]
     frame_roi = frame[y1:y2, x1:x2]
 
+    # Deteksi background putih 
+    lower_white = np.array([240, 240, 240])
+    upper_white = np.array([255, 255, 255])
+    white_mask = cv2.inRange(asset_roi, lower_white, upper_white)
+    non_white_mask = cv2.bitwise_not(white_mask)
+
 def main():
     bg = load_asset("bg_underwater.jpg")
     print(bg.shape)
