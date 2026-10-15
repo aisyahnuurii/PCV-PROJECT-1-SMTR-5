@@ -23,10 +23,15 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
     y1 = max(0, y)
     x2 = min(frame_w, x + w) 
     y2 = min(frame_h, y + h)
-    
-    #  luar layar  skip
-    if x2 <= x1 or y2 <= y1:
+    if x2 <= x1 or y2 <= y1: #offset
         return
+    src_x1 = max(0, -x)      
+    src_y1 = max(0, -y)
+    src_x2 = src_x1 + (x2 - x1)  
+    src_y2 = src_y1 + (y2 - y1)
+
+    asset_roi = asset[src_y1:src_y2, src_x1:src_x2]
+    frame_roi = frame[y1:y2, x1:x2]
 
 def main():
     bg = load_asset("bg_underwater.jpg")
