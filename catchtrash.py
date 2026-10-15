@@ -10,9 +10,16 @@ STATE_PLAY = 1
 STATE_GAMEOVER = 2
 
 def load_asset(filename):
-    pass
+    path = ASSETS_DIR + "/" + filename
+    img = cv2.imread(path, cv2.IMREAD_COLOR)
+    if img is None:
+        raise FileNotFoundError(f"Asset tidak ditemukan: {path}")
+    return img
 
 def main():
+    bg = load_asset("bg_underwater.jpg")
+    print(bg.shape)
+    
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Error: Tidak bisa membuka webcam")
@@ -28,7 +35,13 @@ def main():
         if not ret:
             break
         frame = cv2.flip(frame, 1)  # mirror 
-        cv2.imshow("Catch the Trash", frame)
+
+        
+        display = cv2.resize(bg, (800, 600)).copy()
+        boat_x = 300
+        boat_y = 50
+
+        cv2.imshow("Catch the Trash", display)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
