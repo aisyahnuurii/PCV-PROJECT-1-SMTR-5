@@ -15,6 +15,18 @@ def load_asset(filename):
     if img is None:
         raise FileNotFoundError(f"Asset tidak ditemukan: {path}")
     return img
+    
+def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
+    h, w = asset.shape[:2]  # tinggi & lebar asset
+    # clip
+    x1 = max(0, x)           
+    y1 = max(0, y)
+    x2 = min(frame_w, x + w) 
+    y2 = min(frame_h, y + h)
+    
+    #  luar layar  skip
+    if x2 <= x1 or y2 <= y1:
+        return
 
 def main():
     bg = load_asset("bg_underwater.jpg")
