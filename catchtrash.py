@@ -39,13 +39,20 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
     white_mask = cv2.inRange(asset_roi, lower_white, upper_white)
     non_white_mask = cv2.bitwise_not(white_mask)
 
+    for c in range(3):
+        frame_roi[:, :, c] = np.where(
+            non_white_mask > 0,
+            asset_roi[:, :, c],
+            frame_roi[:, :, c]
+        )
+
 def main():
     bg = load_asset("bg_underwater.jpg")
-    print(bg.shape)
+    boat = load_asset("boat.jpg")
+    print(bg.shape, boat.shape)
     
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("Error: Tidak bisa membuka webcam")
         return
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -58,12 +65,18 @@ def main():
         if not ret:
             break
         frame = cv2.flip(frame, 1)  # mirror 
-
+    # windows resize
+        rect = cv2.getWindowImageRect("Catch the Trash")
+        win_w, win_h = rect[2], rect[3]
+        if win_w <= 0 or win_h <= 0:
+            win_w, win_h = 800, 600
         
-        display = cv2.resize(bg, (800, 600)).copy()
+        display = cv2.resize(bg, (win_w, win_h)).copy()
         boat_x = 300
         boat_y = 50
 
+        chroma_key_overlay(display, boat, boat_x, boat_y, win_w, win_h)
+        
         cv2.imshow("Catch the Trash", display)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
