@@ -54,7 +54,17 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
 def detect_hand(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, MORPH_KERNEL)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, MORPH_KERNEL)
     
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        largest = max(contours, key=cv2.contourArea)
+        M = cv2.moments(largest)
+        if M["m00"] > 0:
+            cx = int(M["m10"] / M["m00"])
+            cy = int(M["m01"] / M["m00"])
+            return cx, cy, mask
     return None, None, mask
     
 def main():
@@ -133,10 +143,18 @@ def main():
         chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
         chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
 
-        
+        hand_x, hand_y, hand_mask = detect_hand(frame)
+
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        mask_raw = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
+        mask_clean = cv2.morphologyEx(mask_raw, cv2.MORPH_OPEN, MORPH_KERNEL)
+        mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_CLOSE, MORPH_KERNEL)
+
         cv2.imshow("Catch the Trash", display)
         cv2.imshow("Original", frame)
         cv2.imshow("Mask", hand_mask)
+        cv2.imshow("Raw", mask_raw)
+        cv2.imshow("Clean", mask_clean)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
