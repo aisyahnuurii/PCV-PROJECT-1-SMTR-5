@@ -111,8 +111,11 @@ def main():
     fishes = []
     trash_items = []
     spawn_timer = 0
+    
+    state = STATE_START
+    score = 0
+    lives = 3
 #loop
-    spawn_timer = 0
     hook_x, hook_y = 400, 300  # Nilai default posisi kail
     
 #cam
@@ -142,6 +145,10 @@ def main():
         display = cv2.resize(bg, (win_w, win_h)).copy()
 
         spawn_timer += 1
+        if hand_x is not None and hand_y is not None:
+            cam_w, cam_h = frame.shape[1], frame.shape[0]
+            hook_x = int(hand_x * (win_w / cam_w))
+            hook_y = int(hand_y * (win_h / cam_h))
 #spwn ikan
         if spawn_timer % 60 == 0:
             fish_type = random.choice([0, 1, 2])
@@ -164,22 +171,26 @@ def main():
                     'y': random.randint(300, win_h - 50),
                     'radius': 20
                 })
-        
-        chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
-        
-        # ikan 
+# ikan 
         for fish in fishes:
             fish['x'] += fish['speed']
             chroma_key_overlay(display, fish['asset'], int(fish['x']), int(fish['y']), win_w, win_h)
         fishes = [f for f in fishes if f['x'] < win_w + 50]
-
-        #sampah
+#collison hook vs sampah
+        surviving_trash = []
+        for t in trash_items:
+                dist = math.sqrt((hook_x - t['x'])**2 + (hook_y - t['y'])**2)
+                if dist < t['radius'] + 15:  
+                    score += 10
+                else:
+                    surviving_trash.append(t)
+        trash_items = surviving_trash
+#sampah
         for t in trash_items:
             chroma_key_overlay(display, t['asset'], 
                             t['x'] - 20, t['y'] - 20, win_w, win_h)
 
-        chroma_key_overlay(display, kaleng1, 500, 250, win_w, win_h)
-        chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
+        chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
         chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
 
         if hand_x is not None and hand_y is not None:
