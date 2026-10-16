@@ -3,11 +3,16 @@ import numpy as np
 import random
 import math
 
-# Konfigurasi global
+# Konfigurasi
 ASSETS_DIR = "assets"
 STATE_START = 0
 STATE_PLAY = 1
 STATE_GAMEOVER = 2
+
+#hsv
+HSV_LOWER = np.array([0, 50, 50])
+HSV_UPPER = np.array([20, 255, 255])
+MORPH_KERNEL = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
 def load_asset(filename):
     path = ASSETS_DIR + "/" + filename
@@ -45,7 +50,13 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
             asset_roi[:, :, c],
             frame_roi[:, :, c]
         )
-
+#bgr hsv
+def detect_hand(frame):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
+    
+    return None, None, mask
+    
 def main():
     bg = load_asset("bg_underwater.jpg")
     boat = load_asset("boat.jpg")
@@ -121,8 +132,11 @@ def main():
         chroma_key_overlay(display, kaleng1, 500, 250, win_w, win_h)
         chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
         chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
+
         
         cv2.imshow("Catch the Trash", display)
+        cv2.imshow("Original", frame)
+        cv2.imshow("Mask", hand_mask)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
