@@ -3,6 +3,7 @@ import numpy as np
 import random
 import math
 
+
 # Konfigurasi
 ASSETS_DIR = "assets"
 STATE_START = 0
@@ -10,8 +11,8 @@ STATE_PLAY = 1
 STATE_GAMEOVER = 2
 
 #hsv
-HSV_LOWER = np.array([0, 50, 50])
-HSV_UPPER = np.array([20, 255, 255])
+HSV_LOWER = np.array([0, 19, 101])
+HSV_UPPER = np.array([21, 255, 255])
 MORPH_KERNEL = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
 def load_asset(filename):
@@ -111,11 +112,11 @@ def main():
     fishes = []
     trash_items = []
     spawn_timer = 0
-    
+
     state = STATE_START
     score = 0
     lives = 3
-#loop
+
     hook_x, hook_y = 400, 300  # Nilai default posisi kail
     
 #cam
@@ -129,7 +130,7 @@ def main():
     cv2.resizeWindow("Catch the Trash", 800, 600)
 
     while True:
-        # windows resize
+# windows resize
         rect = cv2.getWindowImageRect("Catch the Trash")
         win_w, win_h = rect[2], rect[3]
         if win_w <= 0 or win_h <= 0:
@@ -143,77 +144,95 @@ def main():
         hand_x, hand_y, hand_mask = detect_hand(blurred)
         
         display = cv2.resize(bg, (win_w, win_h)).copy()
-
-        spawn_timer += 1
-        if hand_x is not None and hand_y is not None:
-            cam_w, cam_h = frame.shape[1], frame.shape[0]
-            hook_x = int(hand_x * (win_w / cam_w))
-            hook_y = int(hand_y * (win_h / cam_h))
-#spwn ikan
-        if spawn_timer % 60 == 0:
-            fish_type = random.choice([0, 1, 2])
-            fish_y = random.randint(250, win_h - 50)
-            speed = random.uniform(1, 3)
-    
-            fishes.append({
-                'asset': fish_assets[fish_type],
-                'x': -50,                     # mulai kiri
-                'y': fish_y,
-                'speed': speed,
-                'radius': fish_radii[fish_type],
-                'type': fish_type
-            })
-#spawn smaph
-        if spawn_timer % 120 == 0 and len(trash_items) < 4:
-                trash_items.append({
-                    'asset': random.choice(trash_assets),
-                    'x': random.randint(100, win_w - 50),
-                    'y': random.randint(300, win_h - 50),
-                    'radius': 20
+#start
+        if state == STATE_START:
+            cv2.putText(display, "CATCH THE TRASH", 
+                        (win_w // 2 - 290, win_h // 2 - 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 165, 255), 3)
+            cv2.putText(display, "Hindari Ikan! Tangkap Sampah!",
+                        (win_w // 2 - 250, win_h // 2 + 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(display, "PRESS SPACE TO START",
+                        (win_w // 2 - 190, win_h // 2 + 70),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+#gameplay
+        elif state == STATE_PLAY:
+            if hand_x is not None and hand_y is not None:
+                cam_w, cam_h = frame.shape[1], frame.shape[0]
+                hook_x = int(hand_x * (win_w / cam_w))
+                hook_y = int(hand_y * (win_h / cam_h))
+            spawn_timer += 1
+    #spwn ikan
+            if spawn_timer % 60 == 0:
+                fish_type = random.choice([0, 1, 2])
+                fish_y = random.randint(250, win_h - 50)
+                speed = random.uniform(1, 3)
+        
+                fishes.append({
+                    'asset': fish_assets[fish_type],
+                    'x': -50,                     # mulai kiri
+                    'y': fish_y,
+                    'speed': speed,
+                    'radius': fish_radii[fish_type],
+                    'type': fish_type
                 })
-# ikan 
-        for fish in fishes:
-            fish['x'] += fish['speed']
-            chroma_key_overlay(display, fish['asset'], int(fish['x']), int(fish['y']), win_w, win_h)
-        fishes = [f for f in fishes if f['x'] < win_w + 50]
-#collison hook vs sampah
-        surviving_trash = []
-        for t in trash_items:
-                dist = math.sqrt((hook_x - t['x'])**2 + (hook_y - t['y'])**2)
-                if dist < t['radius'] + 15:  
-                    score += 10
-                else:
-                    surviving_trash.append(t)
-        trash_items = surviving_trash
-#collison hook vs ikan
-        surviving_fishes = []
-        hit_fish = False
-        for f in fishes:
-            dist = math.sqrt((hook_x - f['x']) ** 2 + (hook_y - f['y']) ** 2)
-            if dist < f['radius'] + 15 and not hit_fish:
-                lives -= 1
-                hit_fish = True
-                if lives <= 0:
-                    state = STATE_GAMEOVER
-            else:
-                surviving_fishes.append(f)
-            fishes = surviving_fishes 
-#sampah
-        for t in trash_items:
-            chroma_key_overlay(display, t['asset'], 
-                            t['x'] - 20, t['y'] - 20, win_w, win_h)
-
-        chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
-        chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
-
-        if hand_x is not None and hand_y is not None:
-            cam_w, cam_h = frame.shape[1], frame.shape[0]
-            hook_x = int(hand_x * (win_w / cam_w))
-            hook_y = int(hand_y * (win_h / cam_h))
-
-        #hook
-        chroma_key_overlay(display, hook, hook_x - hook.shape[1]//2, hook_y - hook.shape[0]//2, win_w, win_h)
+    #spawn smaph
+            if spawn_timer % 120 == 0 and len(trash_items) < 4:
+                    trash_items.append({
+                        'asset': random.choice(trash_assets),
+                        'x': random.randint(100, win_w - 50),
+                        'y': random.randint(300, win_h - 50),
+                        'radius': 20
+                    })
             
+    # ikan 
+            for fish in fishes:
+                fish['x'] += fish['speed']
+                chroma_key_overlay(display, fish['asset'], int(fish['x']), int(fish['y']), win_w, win_h)
+            fishes = [f for f in fishes if f['x'] < win_w + 50]
+    #collison hook vs sampah
+            surviving_trash = []
+            for t in trash_items:
+                    dist = math.sqrt((hook_x - t['x'])**2 + (hook_y - t['y'])**2)
+                    if dist < t['radius'] + 15:  
+                        score += 10
+                    else:
+                        surviving_trash.append(t)
+            trash_items = surviving_trash
+    #collison hook vs ikan
+            surviving_fishes = []
+            hit_fish = False
+            for f in fishes:
+                dist = math.sqrt((hook_x - f['x']) ** 2 + (hook_y - f['y']) ** 2)
+                if dist < f['radius'] + 15 and not hit_fish:
+                    lives -= 1
+                    hit_fish = True
+                    if lives <= 0:
+                        state = STATE_GAMEOVER
+                else:
+                    surviving_fishes.append(f)
+                    fishes = surviving_fishes 
+                
+    #sampah
+            for t in trash_items:
+                chroma_key_overlay(display, t['asset'], 
+                                t['x'] - 20, t['y'] - 20, win_w, win_h)
+
+            chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
+            chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
+    #hook
+            chroma_key_overlay(display, hook, hook_x - hook.shape[1]//2, hook_y - hook.shape[0]//2, win_w, win_h)
+#gameover
+        elif state == STATE_GAMEOVER:
+            cv2.putText(display, "GAME OVER",
+                        (win_w // 2 - 225, win_h // 2 - 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 0, 255), 3)
+            cv2.putText(display, f"FINAL SCORE: {score}",
+                        (win_w // 2 - 200, win_h // 2 + 20),                                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255), 2)
+            cv2.putText(display, "PRESS R TO RESTART",
+                        (win_w // 2 - 170, win_h // 2 + 70),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        
 # PIP
         pip_w, pip_h = 160, 120
         mask_resized = cv2.resize(hand_mask, (pip_w, pip_h))
@@ -223,8 +242,26 @@ def main():
         display[10:10+pip_h, 10:10+pip_w] = mask_3ch
         
         cv2.imshow("Catch the Trash", display)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
             break
+        elif key == ord(' '):
+            if state == STATE_START:
+                state = STATE_PLAY
+                score = 0
+                lives = 3
+                fishes = []
+                trash_items = []
+                spawn_timer = 0
+        elif key == ord('r'):
+            if state == STATE_GAMEOVER:
+                state = STATE_START
+                score = 0
+                lives = 3
+                fishes = []
+                trash_items = []
+                spawn_timer = 0
 
     cap.release()
     cv2.destroyAllWindows()
