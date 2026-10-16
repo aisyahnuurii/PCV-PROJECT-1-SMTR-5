@@ -105,9 +105,14 @@ def main():
 #random
     fish_assets = [fish_small, fish_medium, fish_big]
     trash_assets = [kaleng1, kaleng2]
-    
  #rad collison
     fish_radii = [45, 30, 50] 
+
+    fishes = []
+
+#loop
+    spawn_timer = 0
+    hook_x, hook_y = 400, 300  # Nilai default posisi kail
     
 #cam
     cap = cv2.VideoCapture(0)
@@ -120,39 +125,57 @@ def main():
     cv2.resizeWindow("Catch the Trash", 800, 600)
 
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frame = cv2.flip(frame, 1)  # mirror 
-# windows resize
+        # windows resize
         rect = cv2.getWindowImageRect("Catch the Trash")
         win_w, win_h = rect[2], rect[3]
         if win_w <= 0 or win_h <= 0:
             win_w, win_h = 800, 600
+            
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame = cv2.flip(frame, 1)  # mirror 
+        blurred = cv2.GaussianBlur(frame, (5, 5), 1.0)
+        hand_x, hand_y, hand_mask = detect_hand(blurred)
         
         display = cv2.resize(bg, (win_w, win_h)).copy()
-        boat_x = 300
-        boat_y = 50
 
+        spawn_timer += 1
+
+        if spawn_timer % 60 == 0:
+            fish_type = random.choice([0, 1, 2])
+            fish_y = random.randint(250, win_h - 50)
+            speed = random.uniform(1, 3)
+    
+            fishes.append({
+                'asset': fish_assets[fish_type],
+                'x': -50,                     # mulai dari luar kiri
+                'y': fish_y,
+                'speed': speed,
+                'radius': fish_radii[fish_type],
+                'type': fish_type
+            })
+        
         chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
-        chroma_key_overlay(display, hook, 400, 300, win_w, win_h)
-        chroma_key_overlay(display, fish_small, 100, 200, win_w, win_h)
-        chroma_key_overlay(display, fish_medium, 200, 300, win_w, win_h)
-        chroma_key_overlay(display, fish_big, 300, 400, win_w, win_h)
+        
+        # ikan spwn
+        for fish in fishes:
+            fish['x'] += fish['speed']
+            chroma_key_overlay(display, fish['asset'], int(fish['x']), int(fish['y']), win_w, win_h)
+        fishes = [f for f in fishes if f['x'] < win_w + 50]
+
         chroma_key_overlay(display, kaleng1, 500, 250, win_w, win_h)
         chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
         chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
 
-        blurred = cv2.GaussianBlur(frame, (5, 5), 1.0)
-        hand_x, hand_y, hand_mask = detect_hand(blurred)
-        
-        if hand_x is not None:
-            cv2.circle(frame, (hand_x, hand_y), 10, (0, 0, 255), -1)  # lingkaran merah
+        if hand_x is not None and hand_y is not None:
+            cam_w, cam_h = frame.shape[1], frame.shape[0]
+            hook_x = int(hand_x * (win_w / cam_w))
+            hook_y = int(hand_y * (win_h / cam_h))
+
+        #hook
+        chroma_key_overlay(display, hook, hook_x - hook.shape[1]//2, hook_y - hook.shape[0]//2, win_w, win_h)
             
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask_raw = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
-        mask_clean = cv2.morphologyEx(mask_raw, cv2.MORPH_OPEN, MORPH_KERNEL)
-        mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_CLOSE, MORPH_KERNEL)
 # PIP
         pip_w, pip_h = 160, 120
         mask_resized = cv2.resize(hand_mask, (pip_w, pip_h))
