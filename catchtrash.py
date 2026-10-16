@@ -144,7 +144,10 @@ def main():
         chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
 
         hand_x, hand_y, hand_mask = detect_hand(frame)
-
+        if hand_x is not None:
+            cv2.circle(frame, (hand_x, hand_y), 10, (0, 0, 255), -1)  # lingkaran merah
+            cv2.putText(frame, f"({hand_x}, {hand_y})", (hand_x + 15, hand_y),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask_raw = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
         mask_clean = cv2.morphologyEx(mask_raw, cv2.MORPH_OPEN, MORPH_KERNEL)
@@ -153,8 +156,6 @@ def main():
         cv2.imshow("Catch the Trash", display)
         cv2.imshow("Original", frame)
         cv2.imshow("Mask", hand_mask)
-        cv2.imshow("Raw", mask_raw)
-        cv2.imshow("Clean", mask_clean)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
