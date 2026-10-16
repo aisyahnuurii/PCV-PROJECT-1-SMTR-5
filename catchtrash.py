@@ -116,7 +116,7 @@ def main():
     state = STATE_START
     score = 0
     lives = 3
-
+#loop
     hook_x, hook_y = 400, 300  # Nilai default posisi kail
     
 #cam
@@ -167,7 +167,6 @@ def main():
                 fish_type = random.choice([0, 1, 2])
                 fish_y = random.randint(250, win_h - 50)
                 speed = random.uniform(1, 3)
-        
                 fishes.append({
                     'asset': fish_assets[fish_type],
                     'x': -50,                     # mulai kiri
@@ -184,11 +183,9 @@ def main():
                         'y': random.randint(300, win_h - 50),
                         'radius': 20
                     })
-            
-    # ikan 
+    # ikan keluar 
             for fish in fishes:
                 fish['x'] += fish['speed']
-                chroma_key_overlay(display, fish['asset'], int(fish['x']), int(fish['y']), win_w, win_h)
             fishes = [f for f in fishes if f['x'] < win_w + 50]
     #collison hook vs sampah
             surviving_trash = []
@@ -211,17 +208,36 @@ def main():
                         state = STATE_GAMEOVER
                 else:
                     surviving_fishes.append(f)
-                    fishes = surviving_fishes 
+            fishes = surviving_fishes 
                 
     #sampah
             for t in trash_items:
                 chroma_key_overlay(display, t['asset'], 
                                 t['x'] - 20, t['y'] - 20, win_w, win_h)
-
-            chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
-            chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
+    #ikan
+            for f in fishes:
+                aw, ah = f['asset'].shape[1], f['asset'].shape[0]
+                chroma_key_overlay(display, f['asset'],
+                                  int(f['x'])-aw//2, int(f['y'])-ah//2,
+                                  win_w, win_h)
+    #perahu
+            boat_x = (win_w - boat.shape[1]) // 2
+            boat_y = 30
+            chroma_key_overlay(display, boat, boat_x, boat_y, win_w, win_h)
+    #tali pancing
+            rod_tip_x = boat_x + boat.shape[1] - 70
+            rod_tip_y = boat_y + boat.shape[0] * 0.35
+            cv2.line(display, (int(rod_tip_x), int(rod_tip_y)),
+                    (hook_x, hook_y), (200, 200, 200), 2)
     #hook
             chroma_key_overlay(display, hook, hook_x - hook.shape[1]//2, hook_y - hook.shape[0]//2, win_w, win_h)
+    #scor hati
+            cv2.putText(display, f"SCORE: {score}", (win_w - 200, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+            for i in range(lives):
+                chroma_key_overlay(display, hati_ui,
+                                win_w - 200 + i*40, 50,
+                                win_w, win_h)
 #gameover
         elif state == STATE_GAMEOVER:
             cv2.putText(display, "GAME OVER",
