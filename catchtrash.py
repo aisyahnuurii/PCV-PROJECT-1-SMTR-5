@@ -109,7 +109,8 @@ def main():
     fish_radii = [45, 30, 50] 
 
     fishes = []
-
+    trash_items = []
+    spawn_timer = 0
 #loop
     spawn_timer = 0
     hook_x, hook_y = 400, 300  # Nilai default posisi kail
@@ -141,7 +142,7 @@ def main():
         display = cv2.resize(bg, (win_w, win_h)).copy()
 
         spawn_timer += 1
-
+#spwn ikan
         if spawn_timer % 60 == 0:
             fish_type = random.choice([0, 1, 2])
             fish_y = random.randint(250, win_h - 50)
@@ -149,20 +150,33 @@ def main():
     
             fishes.append({
                 'asset': fish_assets[fish_type],
-                'x': -50,                     # mulai dari luar kiri
+                'x': -50,                     # mulai kiri
                 'y': fish_y,
                 'speed': speed,
                 'radius': fish_radii[fish_type],
                 'type': fish_type
             })
+#spawn smaph
+        if spawn_timer % 120 == 0 and len(trash_items) < 4:
+                trash_items.append({
+                    'asset': random.choice(trash_assets),
+                    'x': random.randint(100, win_w - 50),
+                    'y': random.randint(300, win_h - 50),
+                    'radius': 20
+                })
         
         chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
         
-        # ikan spwn
+        # ikan 
         for fish in fishes:
             fish['x'] += fish['speed']
             chroma_key_overlay(display, fish['asset'], int(fish['x']), int(fish['y']), win_w, win_h)
         fishes = [f for f in fishes if f['x'] < win_w + 50]
+
+        #sampah
+        for t in trash_items:
+            chroma_key_overlay(display, t['asset'], 
+                            t['x'] - 20, t['y'] - 20, win_w, win_h)
 
         chroma_key_overlay(display, kaleng1, 500, 250, win_w, win_h)
         chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
@@ -185,8 +199,6 @@ def main():
         display[10:10+pip_h, 10:10+pip_w] = mask_3ch
         
         cv2.imshow("Catch the Trash", display)
-        cv2.imshow("Original", frame)
-        cv2.imshow("Mask", hand_mask)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
