@@ -185,6 +185,19 @@ def main():
                 else:
                     surviving_trash.append(t)
         trash_items = surviving_trash
+#collison hook vs ikan
+        surviving_fishes = []
+        hit_fish = False
+        for f in fishes:
+            dist = math.sqrt((hook_x - f['x']) ** 2 + (hook_y - f['y']) ** 2)
+            if dist < f['radius'] + 15 and not hit_fish:
+                lives -= 1
+                hit_fish = True
+                if lives <= 0:
+                    state = STATE_GAMEOVER
+            else:
+                surviving_fishes.append(f)
+            fishes = surviving_fishes 
 #sampah
         for t in trash_items:
             chroma_key_overlay(display, t['asset'], 
