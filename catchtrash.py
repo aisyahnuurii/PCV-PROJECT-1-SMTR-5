@@ -56,7 +56,7 @@ def detect_hand(frame):
     mask = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, MORPH_KERNEL)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, MORPH_KERNEL)
-    
+#centroid
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if contours:
         largest = max(contours, key=cv2.contourArea)
@@ -143,16 +143,24 @@ def main():
         chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
         chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
 
-        hand_x, hand_y, hand_mask = detect_hand(frame)
+        blurred = cv2.GaussianBlur(frame, (5, 5), 1.0)
+        hand_x, hand_y, hand_mask = detect_hand(blurred)
+        
         if hand_x is not None:
             cv2.circle(frame, (hand_x, hand_y), 10, (0, 0, 255), -1)  # lingkaran merah
-            cv2.putText(frame, f"({hand_x}, {hand_y})", (hand_x + 15, hand_y),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask_raw = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
         mask_clean = cv2.morphologyEx(mask_raw, cv2.MORPH_OPEN, MORPH_KERNEL)
         mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_CLOSE, MORPH_KERNEL)
-
+# PIP
+        pip_w, pip_h = 160, 120
+        mask_resized = cv2.resize(hand_mask, (pip_w, pip_h))
+        mask_3ch = cv2.cvtColor(mask_resized, cv2.COLOR_GRAY2BGR)
+        cv2.rectangle(display, (10, 10), (10 + pip_w, 10 + pip_h), 
+                    (255, 255, 255), 2)
+        display[10:10+pip_h, 10:10+pip_w] = mask_3ch
+        
         cv2.imshow("Catch the Trash", display)
         cv2.imshow("Original", frame)
         cv2.imshow("Mask", hand_mask)
