@@ -49,8 +49,16 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
 def main():
     bg = load_asset("bg_underwater.jpg")
     boat = load_asset("boat.jpg")
-    print(bg.shape, boat.shape)
+    hook = load_asset("hook.jpg")
+    hati_img = load_asset("hati.jpg")
     
+    fish_small = load_asset("fish_small.jpg")
+    fish_medium = load_asset("fish_medium.jpg")
+    fish_big = load_asset("fish_big.jpg")
+    
+    kaleng1 = load_asset("kaleng1.png")
+    kaleng2 = load_asset("kaleng2.jpg")
+#cam
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         return
@@ -75,7 +83,14 @@ def main():
         boat_x = 300
         boat_y = 50
 
-        chroma_key_overlay(display, boat, boat_x, boat_y, win_w, win_h)
+        chroma_key_overlay(display, boat, 300, 50, win_w, win_h)
+        chroma_key_overlay(display, hook, 400, 300, win_w, win_h)
+        chroma_key_overlay(display, fish_small, 100, 200, win_w, win_h)
+        chroma_key_overlay(display, fish_medium, 200, 300, win_w, win_h)
+        chroma_key_overlay(display, fish_big, 300, 400, win_w, win_h)
+        chroma_key_overlay(display, kaleng1, 500, 250, win_w, win_h)
+        chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
+        chroma_key_overlay(display, hati_img, 50, 50, win_w, win_h)
         
         cv2.imshow("Catch the Trash", display)
         if cv2.waitKey(1) & 0xFF == ord('q'):
