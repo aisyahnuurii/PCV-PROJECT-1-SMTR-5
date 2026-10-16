@@ -18,7 +18,7 @@ def load_asset(filename):
     
 def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
     h, w = asset.shape[:2]  # tinggi & lebar asset
-    # clip
+# clip
     x1 = max(0, x)           
     y1 = max(0, y)
     x2 = min(frame_w, x + w) 
@@ -33,7 +33,7 @@ def chroma_key_overlay(frame, asset, x, y, frame_w, frame_h):
     asset_roi = asset[src_y1:src_y2, src_x1:src_x2]
     frame_roi = frame[y1:y2, x1:x2]
 
-    # Deteksi background putih 
+# Deteksi background putih 
     lower_white = np.array([240, 240, 240])
     upper_white = np.array([255, 255, 255])
     white_mask = cv2.inRange(asset_roi, lower_white, upper_white)
@@ -58,6 +58,36 @@ def main():
     
     kaleng1 = load_asset("kaleng1.png")
     kaleng2 = load_asset("kaleng2.jpg")
+
+# resize
+    hook_h, hook_w = hook.shape[:2]
+    target_hook_w = 40
+    hook = cv2.resize(hook, (target_hook_w, int(hook_h * (target_hook_w / hook_w))))
+
+    boat_h, boat_w = boat.shape[:2]
+    boat = cv2.resize(boat, (int(boat_w * 0.4), int(boat_h * 0.4)))
+
+    fish_small_h, fish_small_w = fish_small.shape[:2]
+    fish_small = cv2.resize(fish_small, (90, int(fish_small_h * (90 / fish_small_w))))
+    fish_medium_h, fish_medium_w = fish_medium.shape[:2]
+    fish_medium = cv2.resize(fish_medium, (60, int(fish_medium_h * (60 / fish_medium_w))))
+    fish_big_h, fish_big_w = fish_big.shape[:2]
+    fish_big = cv2.resize(fish_big, (90, int(fish_big_h * (90 / fish_big_w))))
+
+    target_trash_w = 40
+    h1, w1 = kaleng1.shape[:2]
+    kaleng1 = cv2.resize(kaleng1, (target_trash_w, int(h1 * (target_trash_w / w1))))
+    h2, w2 = kaleng2.shape[:2]
+    kaleng2 = cv2.resize(kaleng2, (target_trash_w, int(h2 * (target_trash_w / w2))))
+
+    hati_ui = cv2.resize(hati_img, (30, 30))
+#random
+    fish_assets = [fish_small, fish_medium, fish_big]
+    trash_assets = [kaleng1, kaleng2]
+    
+ #rad collison
+    fish_radii = [45, 30, 50] 
+    
 #cam
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -73,7 +103,7 @@ def main():
         if not ret:
             break
         frame = cv2.flip(frame, 1)  # mirror 
-    # windows resize
+# windows resize
         rect = cv2.getWindowImageRect("Catch the Trash")
         win_w, win_h = rect[2], rect[3]
         if win_w <= 0 or win_h <= 0:
@@ -90,7 +120,7 @@ def main():
         chroma_key_overlay(display, fish_big, 300, 400, win_w, win_h)
         chroma_key_overlay(display, kaleng1, 500, 250, win_w, win_h)
         chroma_key_overlay(display, kaleng2, 600, 350, win_w, win_h)
-        chroma_key_overlay(display, hati_img, 50, 50, win_w, win_h)
+        chroma_key_overlay(display, hati_ui, 50, 50, win_w, win_h)
         
         cv2.imshow("Catch the Trash", display)
         if cv2.waitKey(1) & 0xFF == ord('q'):
