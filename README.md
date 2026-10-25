@@ -346,7 +346,8 @@ def detect_hand(frame):
 ```
 
 
-![Centroid Tracking](img/8.centroid.gif)lingkaran merah bergerak mengikuti tangan.
+![Centroid Tracking](img/8.centroid.gif) 
+lingkaran merah bergerak mengikuti tangan.
 
 **Rumus centroid:**
 ```
@@ -392,7 +393,8 @@ if spawn_timer % 60 == 0:
         'type': fish_type
     })
 ```
-![spawn ikan](img/10.spawnikan.gif) ikan muncul dari kiri, bergerak ke kanan, hilang di kanan.
+![spawn ikan](img/10.spawnikan.gif) 
+ikan muncul dari kiri, bergerak ke kanan, hilang di kanan.
 
 **Penjelasan:**
 - `spawn_timer % 60` → setiap 60 frame sekali
@@ -414,7 +416,8 @@ if spawn_timer % 120 == 0 and len(trash_items) < 4:
         'radius': 20
     })
 ```
-![spawn sampah](img/11.spawnsampah.gif) sampah muncul di posisi acak, max 4 di layar.
+![spawn sampah](img/11.spawnsampah.gif) 
+sampah muncul di posisi acak, max 4 di layar.
 
 **Berbeda dengan ikan:**
 - Sampah **tidak bergerak** (tidak ada `x += speed`)
@@ -436,6 +439,167 @@ for t in trash_items:
         surviving_trash.append(t)
 trash_items = surviving_trash
 ```
-![collisionsampah](img/12.hookvssampah.gif) hook menyentuh sampah, sampah hilang, score +10.
+![collisionsampah](img/12.hookvssampah.gif) 
+hook menyentuh sampah, sampah hilang, score +10.
 
 ---
+### 1️3️. Collision Ikan (Lives)
+
+Sama seperti sampah, tapi:
+- Ikan **tidak hilang** saat nabrak
+- **Nyawa** berkurang
+- Pakai flag `hit_fish` supaya **hanya 1 nyawa hilang per frame**
+
+```python
+surviving_fishes = []
+hit_fish = False
+
+for f in fishes:
+    dist = math.sqrt((hook_x - f['x'])**2 + (hook_y - f['y'])**2)
+    if dist < f['radius'] + 15 and not hit_fish:
+        lives -= 1
+        hit_fish = True
+        if lives <= 0:
+            state = STATE_GAMEOVER
+    else:
+        surviving_fishes.append(f)
+fishes = surviving_fishes
+```
+![collisionikan](img/13.hookvsikan.gif) 
+hook nabrak ikan, nyawa berkurang 1 (tidak langsung habis).
+
+**Kenapa flag `hit_fish` penting?**
+
+Tanpa flag:
+```
+Ikan A nabrak → lives 3→2
+Ikan B nabrak → lives 2→1
+Ikan C nabrak → lives 1→0 → GAMEOVER dalam 1 frame!
+```
+
+Dengan flag: hanya 1 nyawa hilang per frame.
+
+---
+
+### 1️4️. State START
+
+Layar pembuka — hanya tampilkan teks, tidak ada gameplay.
+
+```python
+if state == STATE_START:
+    cv2.putText(display, "CATCH THE TRASH", 
+                (win_w // 2 - 290, win_h // 2 - 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 165, 255), 3)
+    cv2.putText(display, "PRESS SPACE TO START",
+                (win_w // 2 - 190, win_h // 2 + 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+```
+![Alt text](img/14.statestart.png) 
+layar pembuka, tekan SPACE untuk mulai.
+
+**Transisi ke PLAY:** tekan SPACE.
+
+---
+
+### 1️5️. State GAMEPLAY
+
+Ini **inti permainan** — semua logika dijalankan:
+
+1. Mapping tangan → hook
+2. Spawn timer
+3. Spawn ikan & sampah
+4. Update posisi ikan
+5. Collision sampah → score
+6. Collision ikan → lives
+7. Render semua objek (urutan penting!)
+8. Render tali pancing
+9. Render hook
+10. Render skor & hati
+
+![Alt text](img/15.stateplkay.png) 
+full gameplay: tangan kontrol kail, tangkap sampah, hindari ikan.
+
+**Mapping tangan:**
+```python
+if hand_x is not None and hand_y is not None:
+    cam_w, cam_h = frame.shape[1], frame.shape[0]
+    hook_x = int(hand_x * (win_w / cam_w))
+    hook_y = int(hand_y * (win_h / cam_h))
+```
+
+**Urutan render (PENTING!):**
+```
+1. Background      (paling bawah)
+2. Sampah
+3. Ikan
+4. Perahu
+5. Tali pancing
+6. Hook
+7. Skor
+8. Hati / UI       (paling atas)
+```
+
+---
+
+### 1️6️. State GAMEOVER
+
+Ditampilkan saat `lives <= 0`.
+
+```python
+elif state == STATE_GAMEOVER:
+    cv2.putText(display, "GAME OVER",
+                (win_w // 2 - 225, win_h // 2 - 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 0, 255), 3)
+    cv2.putText(display, f"FINAL SCORE: {score}",
+                (win_w // 2 - 200, win_h // 2 + 20),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255), 2)
+    cv2.putText(display, "PRESS R TO RESTART",
+                (win_w // 2 - 170, win_h // 2 + 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+```
+![Alt text](img/16.stateover.png) 
+transisi dari PLAY ke GAMEOVER saat nyawa habis.
+
+**Reset saat restart:**
+```python
+elif key == ord('r'):
+    if state == STATE_GAMEOVER:
+        state = STATE_START
+        score = 0
+        lives = 3
+        fishes = []
+        trash_items = []
+        spawn_timer = 0
+```
+
+---
+
+### 1️7️. Teks Score & Hati
+
+**Score** ditampilkan di pojok kanan atas:
+
+```python
+cv2.putText(display, f"SCORE: {score}", 
+            (win_w - 200, 40), 
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+```
+
+**Hati** sebagai icon nyawa:
+
+```python
+for i in range(lives):
+    hati_x = win_w - 200 + (i * 40)
+    hati_y = 50
+    chroma_key_overlay(display, hati_ui, hati_x, hati_y, win_w, win_h)
+```
+![Alt text](img/17.teks.png) 
+score bertambah saat tangkap sampah, hati berkurang saat kena ikan.
+
+**Penjelasan:**
+- `range(lives)` → kalau `lives = 3`, render 3 hati
+- `i * 40` → jarak antar hati 40px
+- `hati_y = 50` → di bawah teks skor
+
+---
+## GAMEPLAY
+<video src="img/gameplay.mp4" width="100%" controls></video>
