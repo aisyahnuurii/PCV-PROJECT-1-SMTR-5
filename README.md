@@ -346,7 +346,7 @@ def detect_hand(frame):
 ```
 
 
-![Centroid Tracking](img/8.centroid.gif) 
+<img src="img/8.centroid.gif" width="100%">
 lingkaran merah bergerak mengikuti tangan.
 
 **Rumus centroid:**
@@ -393,9 +393,7 @@ if spawn_timer % 60 == 0:
         'type': fish_type
     })
 ```
-![spawn ikan](img/10.spawnikan.gif) 
-
-ikan muncul dari kiri, bergerak ke kanan, hilang di kanan.
+<img src="img/10.spawnikan.gif" width="100%"> ikan muncul dari kiri, bergerak ke kanan, hilang di kanan.
 
 **Penjelasan:**
 - `spawn_timer % 60` → setiap 60 frame sekali
@@ -417,9 +415,7 @@ if spawn_timer % 120 == 0 and len(trash_items) < 4:
         'radius': 20
     })
 ```
-![spawn sampah](img/11.spawnsampah.gif) 
-
-sampah muncul di posisi acak, max 4 di layar.
+<img src="img/11.spawnsampah.gif" width="100%"> sampah muncul di posisi acak, max 4 di layar.
 
 **Berbeda dengan ikan:**
 - Sampah **tidak bergerak** (tidak ada `x += speed`)
@@ -441,9 +437,7 @@ for t in trash_items:
         surviving_trash.append(t)
 trash_items = surviving_trash
 ```
-![collisionsampah](img/12.hookvssampah.gif) 
-
-hook menyentuh sampah, sampah hilang, score +10.
+<img src="img/12.hookvssampah.gif" width="100%"> hook menyentuh sampah, sampah hilang, score +10.
 
 ---
 ### 13. Collision Ikan (Lives)
@@ -468,9 +462,7 @@ for f in fishes:
         surviving_fishes.append(f)
 fishes = surviving_fishes
 ```
-![collisionikan](img/13.hookvsikan.gif) 
-
-hook nabrak ikan, nyawa berkurang 1 (tidak langsung habis).
+<img src="img/13.hookvsikan.gif" width="100%"> hook nabrak ikan, nyawa berkurang 1 (tidak langsung habis).
 
 **Kenapa flag `hit_fish` penting?**
 
