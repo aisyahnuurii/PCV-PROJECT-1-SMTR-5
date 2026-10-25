@@ -394,6 +394,7 @@ if spawn_timer % 60 == 0:
     })
 ```
 ![spawn ikan](img/10.spawnikan.gif) 
+
 ikan muncul dari kiri, bergerak ke kanan, hilang di kanan.
 
 **Penjelasan:**
@@ -417,6 +418,7 @@ if spawn_timer % 120 == 0 and len(trash_items) < 4:
     })
 ```
 ![spawn sampah](img/11.spawnsampah.gif) 
+
 sampah muncul di posisi acak, max 4 di layar.
 
 **Berbeda dengan ikan:**
@@ -440,6 +442,7 @@ for t in trash_items:
 trash_items = surviving_trash
 ```
 ![collisionsampah](img/12.hookvssampah.gif) 
+
 hook menyentuh sampah, sampah hilang, score +10.
 
 ---
@@ -466,6 +469,7 @@ for f in fishes:
 fishes = surviving_fishes
 ```
 ![collisionikan](img/13.hookvsikan.gif) 
+
 hook nabrak ikan, nyawa berkurang 1 (tidak langsung habis).
 
 **Kenapa flag `hit_fish` penting?**
