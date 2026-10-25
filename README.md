@@ -128,7 +128,7 @@ catchtrash/
 ##  Penjelasan Pembuatan
 
 
-### 1️. Setup Camera
+### 1. Setup Camera
 
 Buka webcam dan siapkan window yang bisa di-resize.
 
@@ -163,7 +163,7 @@ win_w, win_h = rect[2], rect[3]
 
 ---
 
-### 2️. Background
+### 2. Background
 
 Background bawah laut di-render setiap frame, di-resize sesuai ukuran window.
 
@@ -180,7 +180,7 @@ display = cv2.resize(bg, (win_w, win_h)).copy()
 
 ---
 
-### 3️. Chroma Key
+### 3. Chroma Key
 
 **Masalah:** Asset punya background putih → kalau ditempel langsung, akan muncul kotak putih.
 
@@ -213,7 +213,7 @@ Karena JPG punya **kompresi lossy** — putih murni bisa jadi 248, 250, dst.
 
 ---
 
-### 4️. Load Assets
+### 4. Load Assets
 
 Semua asset dimuat sebagai BGR 3 kanal.
 
@@ -248,7 +248,7 @@ trash_assets = [kaleng1, kaleng2]
 
 ---
 
-### 5️. Resize
+### 5. Resize
 
 Semua asset di-resize supaya proporsional.
 
@@ -279,7 +279,7 @@ fish_radii = [45, 30, 50]  # small, medium, big
 
 ---
 
-### 6️. HSV (Deteksi Warna Kulit)
+### 6. HSV (Deteksi Warna Kulit)
 
 Konversi frame dari **BGR → HSV**, lalu threshold warna kulit.
 
@@ -303,7 +303,7 @@ mask = cv2.inRange(hsv, HSV_LOWER, HSV_UPPER)
 
 ---
 
-### 7️. Morfologi
+### 7. Morfologi
 
 Mask dari `inRange` masih **kotor** — ada noise bintik-bintik dan lubang.
 
@@ -326,7 +326,7 @@ mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, MORPH_KERNEL)
 
 ---
 
-### 8️. Centroid (Pusat Tangan)
+### 8. Centroid (Pusat Tangan)
 
 Cari **titik pusat massa** dari kontur terbesar.
 
@@ -359,7 +359,7 @@ cy = M["m01"] / M["m00"]   # pusat massa Y
 
 ---
 
-### 9️. PIP (Picture-in-Picture)
+### 9. PIP (Picture-in-Picture)
 
 Debug visual: tampilkan mask tangan kecil di pojok kiri atas.
 
@@ -404,7 +404,7 @@ ikan muncul dari kiri, bergerak ke kanan, hilang di kanan.
 
 ---
 
-### 1️1️. Spawn Sampah
+### 11. Spawn Sampah
 
 Sampah muncul di posisi acak dan **diam**.
 
@@ -427,7 +427,7 @@ sampah muncul di posisi acak, max 4 di layar.
 
 ---
 
-### 1️2️. Collision Sampah (Score)
+### 12. Collision Sampah (Score)
 
 Cek jarak hook dengan tiap sampah. Kalau **< radius sampah + radius hook**, tabrakan.
 
@@ -446,7 +446,7 @@ trash_items = surviving_trash
 hook menyentuh sampah, sampah hilang, score +10.
 
 ---
-### 1️3️. Collision Ikan (Lives)
+### 13. Collision Ikan (Lives)
 
 Sama seperti sampah, tapi:
 - Ikan **tidak hilang** saat nabrak
@@ -485,7 +485,7 @@ Dengan flag: hanya 1 nyawa hilang per frame.
 
 ---
 
-### 1️4️. State START
+### 14. State START
 
 Layar pembuka — hanya tampilkan teks, tidak ada gameplay.
 
@@ -505,7 +505,7 @@ layar pembuka, tekan SPACE untuk mulai.
 
 ---
 
-### 1️5️. State GAMEPLAY
+### 15. State GAMEPLAY
 
 Ini **inti permainan** — semua logika dijalankan:
 
@@ -545,7 +545,7 @@ if hand_x is not None and hand_y is not None:
 
 ---
 
-### 1️6️. State GAMEOVER
+### 16. State GAMEOVER
 
 Ditampilkan saat `lives <= 0`.
 
@@ -578,7 +578,7 @@ elif key == ord('r'):
 
 ---
 
-### 1️7️. Teks Score & Hati
+### 17. Teks Score & Hati
 
 **Score** ditampilkan di pojok kanan atas:
 
@@ -607,3 +607,5 @@ score bertambah saat tangkap sampah, hati berkurang saat kena ikan.
 ---
 ## GAMEPLAY
 <video src="img/gameplay.mp4" width="100%" controls></video>
+![gameplay](img/gameplay.gif) 
+
