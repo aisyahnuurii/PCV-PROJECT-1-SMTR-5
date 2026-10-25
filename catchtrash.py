@@ -11,8 +11,8 @@ STATE_PLAY = 1
 STATE_GAMEOVER = 2
 
 #hsv
-HSV_LOWER = np.array([0, 19, 101])
-HSV_UPPER = np.array([21, 255, 255])
+HSV_LOWER = np.array([0, 20, 60])
+HSV_UPPER = np.array([20, 255, 255])
 MORPH_KERNEL = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
 def load_asset(filename):
@@ -244,7 +244,8 @@ def main():
                         (win_w // 2 - 225, win_h // 2 - 40),
                         cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 0, 255), 3)
             cv2.putText(display, f"FINAL SCORE: {score}",
-                        (win_w // 2 - 200, win_h // 2 + 20),                                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255), 2)
+                        (win_w // 2 - 200, win_h // 2 + 20),                                
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255), 2)
             cv2.putText(display, "PRESS R TO RESTART",
                         (win_w // 2 - 170, win_h // 2 + 70),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
