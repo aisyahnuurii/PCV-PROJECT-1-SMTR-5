@@ -607,5 +607,5 @@ score bertambah saat tangkap sampah, hati berkurang saat kena ikan.
 ---
 ## GAMEPLAY
 <video src="img/gameplay.mp4" width="100%" controls></video>
-![gameplay](img/gameplay.gif) 
+<img src="img/gameplay.gif" width="100%">
 
