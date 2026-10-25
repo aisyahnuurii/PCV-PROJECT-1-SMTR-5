@@ -10,7 +10,7 @@
 4. [Cara Menjalankan](#cara-menjalankan)
 5. [Struktur Project](#-struktur-project)
 6. [Penjelasan Pembuatan](#-penjelasan-pembuatan)
-7. [Troubleshooting](#-troubleshooting)
+7. [Gameplay](#-gameplay)
 
 
 ---
